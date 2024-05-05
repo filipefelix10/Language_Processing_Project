@@ -73,13 +73,19 @@ def t_error(t):
     print("Illegal character '%s'" % t.value[0])
     t.lexer.skip(1)
 
+###################################
+
+def read_input_file(filename):
+    with open(filename, 'r') as file:
+        data = file.read()
+    return data
+
+# Lendo o conteúdo do arquivo
+data = read_input_file('input.txt')
 
 parser = yacc.yacc()
 parser.exito = True
 
-data ="""2 2 + .
-3 3 * .
-111 EMIT"""
 
 ast = parser.parse(data)  # O parser retorna a raiz da AST
 

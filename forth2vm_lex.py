@@ -1,4 +1,5 @@
 import ply.lex as lex
+import re
 
 tokens = (
     'NUM',
@@ -12,14 +13,8 @@ tokens = (
 
 literals = [';','/','*','+','"','-','(',')','=','!']
 
-def t_PRINT_S(t):
-    r'\." [a-zA-Z0-9_ ]*"'
-    #remover o poonto e as aspas
-    t.value = t.value[2:-1]
-    return t
-
-def t_VARIABLE(t):
-    r'VARIABLE'
+def t_CR(t):
+    r'(?i:(cr))'
     return t
 
 def t_EMIT(t):
@@ -35,12 +30,18 @@ def t_NUM(t):
     t.value = int(t.value)
     return t
 
-def t_ID(t):
-    r'[a-zA-Z_][a-zA-Z0-9_]*'
+def t_PRINT_S(t):
+    r'\." [a-zA-Z0-9_ ]*"'
+    #remover o poonto e as aspas
+    t.value = t.value[2:-1]
     return t
 
-def t_CR(t):
-    r'CR'
+def t_VARIABLE(t):
+    r'VARIABLE'
+    return t
+
+def t_ID(t):
+    r'[a-zA-Z_][a-zA-Z0-9_]*'
     return t
 
 t_ignore = '\t\r\n '
@@ -56,22 +57,21 @@ def t_error(t):
 
 lexer = lex.lex()
 
-# Test your lexer
-data ="""
-2 2 +
-3 3 *
-4 4 /
-5 5 -
-"""
+def read_input_file(filename):
+    with open(filename, 'r') as file:
+        data = file.read()
+    return data
 
-"""
+# Lendo o conteúdo do arquivo
+data = read_input_file('input.txt')
+
 lexer.input(data)
 while True:
     tok = lexer.token()
     if not tok:
         break
     print(tok)
-"""
+
 
 
 
