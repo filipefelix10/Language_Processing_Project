@@ -1,0 +1,70 @@
+class ASTNode:
+    def __init__(self) -> None:
+        pass
+
+    def generate_code(self):
+        return ""
+    
+    def __str__(self):
+        return self.print_tree()
+
+    def print_tree(self, depth=0):
+        indent = '  ' * depth
+        tree_str = indent + self.__class__.__name__ + '\n'
+        for attr, value in self.__dict__.items():
+            if isinstance(value, ASTNode):
+                tree_str += value.print_tree(depth + 1)
+            elif isinstance(value, list):
+                for item in value:
+                    if isinstance(item, ASTNode):
+                        tree_str += item.print_tree(depth + 1)
+                    else:
+                        tree_str += indent + '  ' + str(item) + '\n'
+            else:
+                tree_str += indent + '  ' + str(attr) + ': ' + str(value) + '\n'
+        return tree_str
+
+
+class ProgramNode(ASTNode):
+    def __init__(self, instructions,flag=None):
+        self.instructions = instructions
+
+    def generate_code(self):
+        code = "start\n"
+        for instruction in self.instructions:
+            code += instruction.generate_code() # gera codigo do programa
+        return code + "stop\n"
+
+
+class NumberNode(ASTNode):
+    def __init__(self, value):
+        self.value = value
+
+    def generate_code(self):
+        return "pushi " + str(self.value) + "\n"
+
+
+class SignalNode(ASTNode):
+    def __init__(self, value):
+        self.value = value
+    
+    def generate_code(self):
+        match self.value:
+            case '+': res = 'add'
+            case '-': res = 'sub'
+            case '*': res = 'mul'
+            case '/': res = 'div'
+        return res + "\n"
+
+
+class FuncNode(ASTNode):
+    def __init__(self, value):
+        self.value = value
+
+    def generate_code(self):
+        match self.value:
+            case '.': res = 'writei\n' + 'pushs " "\n' + 'writes'
+            case 'PRINT_S': res = 'writes'
+            case 'EMIT': res = 'writechr'
+            case 'CR': res = 'writeln'
+        return res + "\n"
