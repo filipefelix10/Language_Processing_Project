@@ -48,7 +48,11 @@ def p_FUNC(p):
     """FUNC : DOT
             | PRINT_S
             | EMIT
-            | CR"""
+            | CR
+            | DUP
+            | VARIABLE
+            | DEC_VAR
+            | USE_VAR"""
     p[0] = arvore.FuncNode(p[1])
 
 
@@ -86,12 +90,13 @@ data = read_input_file('input.txt')
 parser = yacc.yacc()
 parser.exito = True
 
-
 ast = parser.parse(data)  # O parser retorna a raiz da AST
 
-print(ast)  # Imprime a AST
+#print(ast)  # Imprime a AST
 
+# fazer a travessia na arvore
 print(ast.generate_code())  # Gera o código da AST
+arvore.ProgramNode.print_lista_variaveis()  # Imprime a lista de variáveis
 
 
 

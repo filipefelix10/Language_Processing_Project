@@ -9,16 +9,31 @@ tokens = (
     'EMIT',
     'PRINT_S',
     'DOT',
+    'DUP',
+    'DEC_VAR',
+    'USE_VAR',
 )
 
-literals = [';','/','*','+','"','-','(',')','=','!']
+literals = [';','/','*','+','"','-','(',')','=','<','>']
 
 def t_CR(t):
     r'(?i:(cr))'
     return t
 
 def t_EMIT(t):
-    r'EMIT'
+    r'(?i:(EMIT))'
+    return t
+
+def t_DUP(t):
+    r'(?i:(DUP))'
+    return t
+
+def t_DEC_VAR(t):
+    r'(([a-zA-Z]+\w*)?)\s!'
+    return t
+
+def t_USE_VAR(t):
+    r'(([a-zA-Z]+\w*)?)\s@'
     return t
 
 def t_DOT(t):
@@ -30,14 +45,14 @@ def t_NUM(t):
     t.value = int(t.value)
     return t
 
+def t_VARIABLE(t):
+    r'VARIABLE(\s[a-zA-Z]+\w*)?'
+    return t
+
 def t_PRINT_S(t):
     r'\." [a-zA-Z0-9_ ]*"'
     #remover o poonto e as aspas
     t.value = t.value[2:-1]
-    return t
-
-def t_VARIABLE(t):
-    r'VARIABLE'
     return t
 
 def t_ID(t):
@@ -65,12 +80,16 @@ def read_input_file(filename):
 # Lendo o conteúdo do arquivo
 data = read_input_file('input.txt')
 
+
 lexer.input(data)
 while True:
     tok = lexer.token()
     if not tok:
         break
     print(tok)
+print("Fim da análise léxica.\n")
+
+
 
 
 

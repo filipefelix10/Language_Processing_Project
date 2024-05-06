@@ -1,3 +1,4 @@
-2 2 +
-3 3 * CR
-2 .
+VARIABLE ola
+3 ola !
+2 2 *
+ola @ 3 + .
