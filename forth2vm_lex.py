@@ -4,17 +4,19 @@ import re
 tokens = (
     'NUM',
     'ID',
-    'VARIABLE',
     'CR',
     'EMIT',
     'PRINT_S',
     'DOT',
     'DUP',
     'DEC_VAR',
+    'ATRB_VAR',
     'USE_VAR',
+    'DEC_WORD',
+    'USE_WORD',
 )
 
-literals = [';','/','*','+','"','-','(',')','=','<','>']
+literals = ['/','*','+','"','-','(',')','=','<','>']
 
 def t_CR(t):
     r'(?i:(cr))'
@@ -28,12 +30,20 @@ def t_DUP(t):
     r'(?i:(DUP))'
     return t
 
-def t_DEC_VAR(t):
+def t_ATRB_VAR(t):
     r'(([a-zA-Z]+\w*)?)\s!'
     return t
 
 def t_USE_VAR(t):
     r'(([a-zA-Z]+\w*)?)\s@'
+    return t
+
+def t_DEC_WORD(t):
+    r':\s[a-zA-Z]+\w*\s\(n(\sn)*\)(\s[a-zA-Z0-9*+-/]+)+\s;'
+    return t
+
+def t_USE_WORD(t):
+    r'(([a-zA-Z]+\w*)?)\s\.'
     return t
 
 def t_DOT(t):
@@ -45,7 +55,7 @@ def t_NUM(t):
     t.value = int(t.value)
     return t
 
-def t_VARIABLE(t):
+def t_DEC_VAR(t):
     r'VARIABLE(\s[a-zA-Z]+\w*)?'
     return t
 

@@ -11,11 +11,21 @@ instructions : instructions instruction
 
 instruction : NUM
             | SINAL
-            | FUNC
+            | WORD
 
-FUNC : DOT
-     | PRINT_S
-     | EMIT
+WORD : WORD_EXEC
+     | WORD_DEC
+
+WORD_EXEC : DOT
+          | PRINT_S
+          | EMIT
+          | CR
+          | DUP
+          | USE_VAR
+
+WORD_DEC : DEC_WORD
+         | ATRB_VAR
+         | DEC_VAR
 
 SINAL : '+'
       | '-'
@@ -38,22 +48,33 @@ def p_instructions_single(p):
 
 def p_instruction1(p):
     """instruction : NUM"""
-    p[0] = arvore.NumberNode(p[1])
+    p[0] = arvore.NumberNode(p[1]) 
 
 def p_instruction2(p):
-    """instruction : FUNC"""
+    """instruction : WORD"""
     p[0] = p[1]
 
-def p_FUNC(p):
-    """FUNC : DOT
-            | PRINT_S
-            | EMIT
-            | CR
-            | DUP
-            | VARIABLE
-            | DEC_VAR
-            | USE_VAR"""
-    p[0] = arvore.FuncNode(p[1])
+def p_WORD(p):
+    """WORD : WORD_EXEC
+            | WORD_DEC"""
+    p[0] = p[1]
+
+def p_WORD_EXEC(p):
+    """WORD_EXEC : DOT
+                 | PRINT_S
+                 | EMIT
+                 | CR
+                 | DUP
+                 | USE_VAR
+                 | USE_WORD"""
+    print(p[1])
+    p[0] = arvore.WordNodeExec(p[1])
+
+def p_WORD_DEC(p):
+    """WORD_DEC : DEC_WORD
+                | ATRB_VAR
+                | DEC_VAR"""
+    p[0] = arvore.WordNodeDec(p[1])
 
 
 def p_instruction3(p):
