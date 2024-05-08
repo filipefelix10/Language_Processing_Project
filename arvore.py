@@ -106,11 +106,12 @@ class WordNodeExec(ASTNode):
                         res = "pusha " + str(valor[0]) + "\n" + "call\n"
                     else: res = ""
             case _ if len(valor) > 1:
-                    if(len(print_s)) >2: print_s = re.sub(r"(^'|'$)", "", print_s[1])
+                    if(len(print_s)) > 1: print_s = re.sub(r"(^'|'$)", "", print_s[1])
+                    print(print_s)
                     if valor[0] in dict_vars and valor[1] == "@":
                         posicao = dict_vars[valor[0]]["pos"]
                         res = "pushg " + str(posicao)
-                    elif re.match(r'"\s(\w+\s*)*"', print_s):
+                    elif re.match(r'(\.)?"\s(\w+\s*)*"', print_s):
                         res = 'pushs ' + print_s + "\n" + "writes" + "\n"
                     else: res = ""
         return res + "\n"
@@ -146,17 +147,23 @@ class WordNodeDec(ASTNode):
 
 
 class ConditionNode(ASTNode):
-    def __init__(self, condition1, condition2=None):
+    def __init__(self, condition1, if_count, condition2=None):
         self.condition1 = condition1
         self.condition2 = condition2
-
+        self.if_count = if_count
+    
     def generate_code(self):
-        print(self.condition1)
-        print(self.condition2)
-        code = self.condition1.generate_code()
-        if self.condition2:
-            code += self.condition2.generate_code()
+        code = "jz else" + str(self.if_count) + "\n"
+        for i in self.condition1:
+            code += i.generate_code()
+        code += "jump endif" + str(self.if_count) + "\n"
+        code += "else" + str(self.if_count) + ":\n"
+        for i in self.condition2:
+            code += i.generate_code()
+        code += "endif" + str(self.if_count) + ":\n"
+
         return code
+
 
 
 def get_intrucoes(valor):

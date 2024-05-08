@@ -3,7 +3,6 @@ import re
 
 tokens = (
     'NUM',
-    'ID',
     'CR',
     'EMIT',
     'PRINT_S',
@@ -102,10 +101,6 @@ def t_DOT(t):
 def t_NUM(t):
     r'\d+'
     t.value = int(t.value)
-    return t
-
-def t_ID(t):
-    r'[a-zA-Z_][a-zA-Z0-9_]*'
     return t
 
 t_ignore = '\t\r\n '

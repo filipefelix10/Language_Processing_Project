@@ -1,0 +1,38 @@
+start
+pushi 4
+pushi 5
+sup
+jz else3
+pushi 3
+pushi 3
+inf
+jz else1
+pushs " ola"
+writes
+
+jump endif1
+else1:
+pushs " xau2"
+writes
+
+endif1:
+jump endif3
+else3:
+pushi 2
+pushi 3
+infeq
+jz else2
+pushi 2
+writei
+pushs " "
+writes
+jump endif2
+else2:
+pushi 3
+writei
+pushs " "
+writes
+endif2:
+endif3:
+stop
+

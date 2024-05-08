@@ -3,6 +3,9 @@ import ply.yacc as yacc
 import arvore
 from forth2vm_lex import tokens
 
+global if_count
+if_count = 1
+
 """
 VM : instructions
 
@@ -55,30 +58,28 @@ def p_instructions_single(p):
     """instructions : instruction"""
     p[0] = [p[1]]
 
-def p_instruction1(p):
-    """instruction : NUM"""
-    p[0] = arvore.NumberNode(p[1]) 
-
-def p_instruction3(p):
+def p_instruction2(p):
     """instruction : CONDITION"""
     p[0] = p[1]
 
 def p_CONDITION(p):
-    """CONDITION : COND1
-                 | COND2"""
-    p[0] = p[1]
+    """CONDITION : IF instructions ELSE instructions THEN
+                 | IF instructions THEN"""
+    global if_count
+    if len(p) == 6:
+        p[0] = arvore.ConditionNode(p[2],if_count,p[4])
+        if_count += 1
+    else:
+        p[0] = arvore.ConditionNode(p[2],if_count)
+        
 
-def p_instruction2(p):
+def p_instruction3(p):
     """instruction : WORD"""
     p[0] = p[1]
 
-def p_COND1(p):
-    """COND1 : IF instruction ELSE instruction THEN """
-    p[0] = arvore.ConditionNode(p[2],p[4])
-
-def p_COND2(p):
-    """COND2 : IF instruction THEN"""
-    p[0] = arvore.ConditionNode(p[2])
+def p_instruction4(p):
+    """instruction : NUM"""
+    p[0] = arvore.NumberNode(p[1]) 
 
 def p_WORD(p):
     """WORD : WORD_EXEC
@@ -86,8 +87,8 @@ def p_WORD(p):
     p[0] = p[1]
 
 def p_WORD_EXEC(p):
-    """WORD_EXEC : DOT
-                 | PRINT_S
+    """WORD_EXEC : PRINT_S
+                 | DOT
                  | EMIT
                  | CR
                  | DUP
@@ -104,7 +105,7 @@ def p_WORD_DEC(p):
     p[0] = arvore.WordNodeDec(p[1])
 
 
-def p_instruction3(p):
+def p_instruction5(p):
     """instruction : SINAL"""
     p[0] = p[1]
 
