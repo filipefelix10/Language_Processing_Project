@@ -14,9 +14,46 @@ tokens = (
     'USE_VAR',
     'DEC_WORD',
     'USE_WORD',
+    'SWAP',
+    'IF',
+    'ELSE',
+    'THEN',
+    'SUP',
+    'INF',
+    'INFEQ',
+    'SUPEQ',
 )
 
-literals = ['/','*','+','"','-','(',')','=','<','>']
+literals = ['/','*','+','"','-','(',')','=']
+
+
+def t_INFEQ(t):
+    r'<='
+    return t
+
+def t_SUPEQ(t):
+    r'>='
+    return t
+
+def t_SUP(t):
+    r'>'
+    return t
+
+def t_INF(t):
+    r'<'
+    return t
+
+def t_IF(t):
+    r'(?i:(IF))'
+    return t
+
+def t_ELSE(t):
+    r'(?i:(ELSE))'
+    return t
+
+def t_THEN(t):
+    r'(?i:(THEN))'
+    return t
 
 def t_CR(t):
     r'(?i:(cr))'
@@ -30,6 +67,14 @@ def t_DUP(t):
     r'(?i:(DUP))'
     return t
 
+def t_SWAP(t):
+    r'(?i:(SWAP))'
+    return t
+
+def t_PRINT_S(t):
+    r'\." [a-zA-Z0-9_ ]*"'
+    return t
+
 def t_ATRB_VAR(t):
     r'(([a-zA-Z]+\w*)?)\s!'
     return t
@@ -39,11 +84,15 @@ def t_USE_VAR(t):
     return t
 
 def t_DEC_WORD(t):
-    r':\s[a-zA-Z]+\w*\s\(n(\sn)*\)(\s[a-zA-Z0-9*+-/]+)+\s;'
+    r':\s[a-zA-Z]+\w*\s\(\sn(\sn)*\s\)(\s[a-zA-Z0-9*+-/]+(\s@)?)+\s;'
+    return t
+
+def t_DEC_VAR(t):
+    r'VARIABLE(\s[a-zA-Z]+\w*)?'
     return t
 
 def t_USE_WORD(t):
-    r'(([a-zA-Z]+\w*)?)\s\.'
+    r'([a-zA-Z]+\w*)'
     return t
 
 def t_DOT(t):
@@ -53,16 +102,6 @@ def t_DOT(t):
 def t_NUM(t):
     r'\d+'
     t.value = int(t.value)
-    return t
-
-def t_DEC_VAR(t):
-    r'VARIABLE(\s[a-zA-Z]+\w*)?'
-    return t
-
-def t_PRINT_S(t):
-    r'\." [a-zA-Z0-9_ ]*"'
-    #remover o poonto e as aspas
-    t.value = t.value[2:-1]
     return t
 
 def t_ID(t):

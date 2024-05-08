@@ -12,6 +12,10 @@ instructions : instructions instruction
 instruction : NUM
             | SINAL
             | WORD
+            | CONDITION
+
+CONDITION : COND1
+          | COND2
 
 WORD : WORD_EXEC
      | WORD_DEC
@@ -21,6 +25,7 @@ WORD_EXEC : DOT
           | EMIT
           | CR
           | DUP
+          | SWAP
           | USE_VAR
 
 WORD_DEC : DEC_WORD
@@ -31,6 +36,10 @@ SINAL : '+'
       | '-'
       | '*' 
       | '/'
+      | INF
+      | SUP
+      | INFEQ
+      | SUPEQ
 """
 
 
@@ -50,9 +59,26 @@ def p_instruction1(p):
     """instruction : NUM"""
     p[0] = arvore.NumberNode(p[1]) 
 
+def p_instruction3(p):
+    """instruction : CONDITION"""
+    p[0] = p[1]
+
+def p_CONDITION(p):
+    """CONDITION : COND1
+                 | COND2"""
+    p[0] = p[1]
+
 def p_instruction2(p):
     """instruction : WORD"""
     p[0] = p[1]
+
+def p_COND1(p):
+    """COND1 : IF instruction ELSE instruction THEN """
+    p[0] = arvore.ConditionNode(p[2],p[4])
+
+def p_COND2(p):
+    """COND2 : IF instruction THEN"""
+    p[0] = arvore.ConditionNode(p[2])
 
 def p_WORD(p):
     """WORD : WORD_EXEC
@@ -65,6 +91,7 @@ def p_WORD_EXEC(p):
                  | EMIT
                  | CR
                  | DUP
+                 | SWAP
                  | USE_VAR
                  | USE_WORD"""
     print(p[1])
@@ -85,7 +112,11 @@ def p_SINAL(p):
     """SINAL : '+'
              | '-'
              | '*'
-             | '/'"""
+             | '/'
+             | INF
+             | SUP
+             | INFEQ
+             | SUPEQ"""
     p[0] = arvore.SignalNode(p[1])
 
 def p_error(p):
@@ -110,10 +141,15 @@ data = read_input_file('input.txt')
 
 parser = yacc.yacc()
 parser.exito = True
+parser.count_ciclos = 0
 
 ast = parser.parse(data)  # O parser retorna a raiz da AST
 
-#print(ast)  # Imprime a AST
+def write_output_file(filename, data):
+    with open(filename, 'w') as file:
+        file.write(data)
+
+write_output_file('output.txt', ast.generate_code())  # Gera o código da AST
 
 # fazer a travessia na arvore
 print(ast.generate_code())  # Gera o código da AST

@@ -1,2 +1,6 @@
-: square (n) dup + ;
-5 square .
+VARIABLE ola
+5 ola !
+ola @
+: square ( n ) DUP * ;
+: triple ( n ) square ola @ * ;
+5 triple .

@@ -1,8 +1,10 @@
-global n_pushi, dict_var, dict_vars, dict_func
+import re
+
+
+global n_pushi, dict_var, dict_vars
 n_pushi = 0
 dict_var = []
 dict_vars = {}
-dict_func = {}
 
 
 class ASTNode:
@@ -42,7 +44,7 @@ class ProgramNode(ASTNode):
             code += instruction.generate_code() # gera codigo do programa
         if (n_pushi > 0 ):
             code = "pushn " + str(n_pushi) + "\n" + code
-        code = code + "stop\n"
+        code = code + "stop\n\n"
         for func in dict_vars:
             if dict_vars[func]["tipo"] == "FUNC":
                 code += dict_vars[func]["instrucoes"]
@@ -56,6 +58,8 @@ class ProgramNode(ASTNode):
             for key2,value2 in value.items():
                 print("  "+key2, ":", value2)
 
+    def get_dict_vars():
+        return dict_vars
     
 
 class NumberNode(ASTNode):
@@ -76,6 +80,10 @@ class SignalNode(ASTNode):
             case '-': res = 'sub'
             case '*': res = 'mul'
             case '/': res = 'div'
+            case '>': res = 'sup'
+            case '<': res = 'inf'
+            case '<=': res = 'infeq'
+            case '>=': res = 'supeq'
         return res + "\n"
 
 
@@ -85,20 +93,25 @@ class WordNodeExec(ASTNode):
 
     def generate_code(self):
         global n_pushi, dict_var, dict_vars
+        print_s = self.value.split(".")
         valor = self.value.split(" ")
-        print(valor)
-        match valor[0]:
+        match valor[0].upper():
             case '.': res = 'writei\n' + 'pushs " "\n' + 'writes'
-            case 'PRINT_S': res = 'writes'
             case 'EMIT': res = 'writechr'
             case 'CR': res = 'writeln'
             case 'DUP': res = 'dup 1'
+            case 'SWAP': res = 'swap'
+            case _ if len(valor) == 1:
+                    if valor[0] in dict_vars:
+                        res = "pusha " + str(valor[0]) + "\n" + "call\n"
+                    else: res = ""
             case _ if len(valor) > 1:
+                    if(len(print_s)) >2: print_s = re.sub(r"(^'|'$)", "", print_s[1])
                     if valor[0] in dict_vars and valor[1] == "@":
                         posicao = dict_vars[valor[0]]["pos"]
                         res = "pushg " + str(posicao)
-                    elif valor[0] in dict_vars and valor[1] == ".":
-                        res = "pusha " + str(valor[0]) + "\n" + "call\n"
+                    elif re.match(r'"\s(\w+\s*)*"', print_s):
+                        res = 'pushs ' + print_s + "\n" + "writes" + "\n"
                     else: res = ""
         return res + "\n"
     
@@ -108,7 +121,7 @@ class WordNodeDec(ASTNode):
         self.value = value
 
     def generate_code(self):
-        global n_pushi, dict_var, dict_vars, dict_func
+        global n_pushi, dict_var, dict_vars
         valor = self.value.split(" ")
         print(valor)
         match valor[0]:
@@ -127,24 +140,38 @@ class WordNodeDec(ASTNode):
                         dict_temp = {"tipo": "FUNC", "pos": n_pushi, "instrucoes": get_intrucoes(valor)}
                         dict_var.append(dict_temp)
                         dict_vars[valor[1]] = dict_temp
-                        n_pushi += 1
                         res = ""
                     else: res = ""
         return res + "\n"
 
+
+class ConditionNode(ASTNode):
+    def __init__(self, condition1, condition2=None):
+        self.condition1 = condition1
+        self.condition2 = condition2
+
+    def generate_code(self):
+        print(self.condition1)
+        print(self.condition2)
+        code = self.condition1.generate_code()
+        if self.condition2:
+            code += self.condition2.generate_code()
+        return code
+
+
 def get_intrucoes(valor):
     instr = valor[1] + ":\n"
-    valor = " ".join(valor) 
+    valor = " ".join(valor)
     valor = valor.split(")")
-    n_numbers = valor[0].split("(")[1].split(" ")
-    len_n = len(n_numbers)
+    list_n = valor[0].split("(")[1].split(" ")
+    n_numbers = list_n.count("n")
     valor = valor[1].split(" ")
 
-    for n in range(0,len_n):
+    for n in range(0,n_numbers):
         instr += "pushfp\n" + "load " + str(-1-n) + "\n"
 
     for i in range(0,len(valor)-1):
-        match valor[i]:
+        match valor[i].upper():
             case '.': 
                 instr += 'writei\n' + 'pushs " "\n' + 'writes\n'
             case 'PRINT_S':
@@ -155,6 +182,8 @@ def get_intrucoes(valor):
                 instr += 'writeln\n'
             case 'DUP':
                 instr += 'dup 1\n'
+            case 'SWAP':
+                instr += 'swap\n'
             case '+':
                 instr += 'add\n'
             case '-':
@@ -163,13 +192,31 @@ def get_intrucoes(valor):
                 instr += 'mul\n'
             case '/':
                 instr += 'div\n'
+            case '>':
+                instr += 'sup\n'
+            case '<':
+                instr += 'inf\n'
+            case '<=':
+                instr += 'infeq\n'
+            case '>=':
+                instr += 'supeq\n'
             case _ if valor[i] in dict_vars:
-                instr += ""
-            case _:   
-                instr += ""
+                if dict_vars[valor[i]]["tipo"] == "FUNC":
+                    instr += "pusha " + str(valor[i]) + "\n" + "call\n"
+                elif valor[i] in dict_vars and dict_vars[valor[i]]["tipo"] == "VARIABLE":
+                    posicao = dict_vars[valor[i]]["pos"]
+                    instr += "pushg " + str(posicao) + "\n"
+                else:
+                    instr += ""
+            case _:  # Default case to handle anything not matched specifically
+                if re.match(r'\d+', valor[i]):  # Checking if the item is all digits
+                    instr += "pushi " + valor[i] + "\n"
+                else:
+                    instr += ""
 
-    instr += "return\n"  
+    instr += "return\n\n"  
     return instr
+
 
 
 
