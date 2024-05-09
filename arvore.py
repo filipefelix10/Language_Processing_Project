@@ -1,8 +1,7 @@
 import re
 
 
-global n_pushi, dict_var, dict_vars
-n_pushi = 0
+global dict_var, dict_vars
 dict_var = []
 dict_vars = {}
 
@@ -35,15 +34,16 @@ class ASTNode:
 
 
 class ProgramNode(ASTNode):
-    def __init__(self, instructions):
+    def __init__(self, instructions, n_pushi):
         self.instructions = instructions
+        self.n_pushi = n_pushi
 
     def generate_code(self):
         code = "start\n"
         for instruction in self.instructions:
             code += instruction.generate_code() # gera codigo do programa
-        if (n_pushi > 0 ):
-            code = "pushn " + str(n_pushi) + "\n" + code
+        if (self.n_pushi > 0 ):
+            code = "pushn " + str(self.n_pushi) + "\n" + code
         code = code + "stop\n\n"
         for func in dict_vars:
             if dict_vars[func]["tipo"] == "FUNC":
@@ -84,6 +84,7 @@ class SignalNode(ASTNode):
             case '<': res = 'inf'
             case '<=': res = 'infeq'
             case '>=': res = 'supeq'
+            case '=' : res = 'equal'
         return res + "\n"
 
 
@@ -91,8 +92,9 @@ class WordNodeExec(ASTNode):
     def __init__(self, value):
         self.value = value
 
+
     def generate_code(self):
-        global n_pushi, dict_var, dict_vars
+        global dict_var, dict_vars
         print_s = self.value.split(".")
         valor = self.value.split(" ")
         match valor[0].upper():
@@ -101,6 +103,7 @@ class WordNodeExec(ASTNode):
             case 'CR': res = 'writeln'
             case 'DUP': res = 'dup 1'
             case 'SWAP': res = 'swap'
+            case 'DROP': res = 'pop 1'
             case _ if len(valor) == 1:
                     if valor[0] in dict_vars:
                         res = "pusha " + str(valor[0]) + "\n" + "call\n"
@@ -118,27 +121,27 @@ class WordNodeExec(ASTNode):
     
 
 class WordNodeDec(ASTNode):
-    def __init__(self, value):
+    def __init__(self, value, n_pushi):
         self.value = value
+        self.n_pushi = n_pushi
 
     def generate_code(self):
-        global n_pushi, dict_var, dict_vars
+        global dict_var, dict_vars
         valor = self.value.split(" ")
         print(valor)
         match valor[0]:
             case 'VARIABLE':
                 if len(valor) > 1:
-                    dict_temp = {"tipo": "VARIABLE", "pos": n_pushi}
+                    dict_temp = {"tipo": "VARIABLE", "pos": self.n_pushi}
                     dict_var.append(dict_temp)
                     dict_vars[valor[1]] = dict_temp
-                    n_pushi += 1
                 res = ""
             case _ if len(valor) > 1:
                     if valor[0] in dict_vars and valor[1] == "!":
                         posicao = dict_vars[valor[0]]["pos"]
                         res = "storeg " + str(posicao)
                     elif valor[0] == ":":
-                        dict_temp = {"tipo": "FUNC", "pos": n_pushi, "instrucoes": get_intrucoes(valor)}
+                        dict_temp = {"tipo": "FUNC", "pos": self.n_pushi, "instrucoes": get_intrucoes(valor)}
                         dict_var.append(dict_temp)
                         dict_vars[valor[1]] = dict_temp
                         res = ""
@@ -165,6 +168,81 @@ class ConditionNode(ASTNode):
         return code
 
 
+class LoopNodeUntil(ASTNode):
+    def __init__(self, condition1, if_count):
+        self.condition1 = condition1
+        self.if_count = if_count
+    
+    def generate_code(self):
+        code = "while" + str(self.if_count) + ":\n"
+        for i in self.condition1:
+            code += i.generate_code()
+        code += "jz endwhile" + str(self.if_count) + "\n"
+        code += "jump while" + str(self.if_count) + "\n"
+        code += "endwhile" + str(self.if_count) + ":\n"
+
+        return code
+    
+class LoopNodeAgain(ASTNode):
+    def __init__(self, condition1, if_count):
+        self.condition1 = condition1
+        self.if_count = if_count
+    
+    def generate_code(self):
+        code = "while" + str(self.if_count) + ":\n"
+        for i in self.condition1:
+            code += i.generate_code()
+        code += "jump while" + str(self.if_count) + "\n"
+
+        return code
+    
+class LoopNodeWhile(ASTNode):
+    def __init__(self, condition1, if_count, condition2=None):
+        self.condition1 = condition1
+        self.condition2 = condition2
+        self.if_count = if_count
+    
+    def generate_code(self):
+        code = "while" + str(self.if_count) + ":\n"
+        for i in self.condition1:
+            code += i.generate_code()
+        code += "jz endwhile" + str(self.if_count) + "\n"
+        for i in self.condition2:
+            code += i.generate_code()
+        code += "jump while" + str(self.if_count) + "\n"
+        code += "endwhile" + str(self.if_count) + ":\n"
+
+        return code
+    
+class LoopNodeDO(ASTNode):
+    def __init__(self, condition1, if_count, n_pushi, isPlus=False):
+        self.condition1 = condition1
+        self.if_count = if_count
+        self.n_pushi = n_pushi
+        self.isPlus = isPlus
+    
+    def generate_code(self):
+        code = "storeg " + str(self.n_pushi+1) + "\n" 
+        code += "storeg " + str(self.n_pushi) + "\n"
+        code += "while" + str(self.if_count) + ":\n"
+        for i in self.condition1:
+            code += i.generate_code()
+        code += "pushg " + str(self.n_pushi+1) + "\n"
+        if self.isPlus:
+            code += str(self.condition1[-1].generate_code())
+        else:
+            code += "pushi 1\n"
+        code += "add\n"
+        code += "storeg " + str(self.n_pushi+1) + "\n"
+        code += "pushg " + str(self.n_pushi+1) + "\n"
+        code += "pushg " + str(self.n_pushi) + "\n"
+        code += "inf\n"
+        code += "jz endwhile" + str(self.if_count) + "\n"
+        code += "jump while" + str(self.if_count) + "\n"
+        code += "endwhile" + str(self.if_count) + ":\n"
+
+        return code
+    
 
 def get_intrucoes(valor):
     instr = valor[1] + ":\n"
@@ -191,6 +269,10 @@ def get_intrucoes(valor):
                 instr += 'dup 1\n'
             case 'SWAP':
                 instr += 'swap\n'
+            case 'DROP':
+                instr += 'pop 1\n'
+            case 'PRINT_S': 
+                instr += 'writes\n' # FIXME: Implementar PRINT_S
             case '+':
                 instr += 'add\n'
             case '-':
@@ -207,6 +289,8 @@ def get_intrucoes(valor):
                 instr += 'infeq\n'
             case '>=':
                 instr += 'supeq\n'
+            case '=':
+                instr += 'equal\n'
             case _ if valor[i] in dict_vars:
                 if dict_vars[valor[i]]["tipo"] == "FUNC":
                     instr += "pusha " + str(valor[i]) + "\n" + "call\n"

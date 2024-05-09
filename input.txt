@@ -1,9 +1,2 @@
-4 5 > IF
-     3 3 < IF ." ola"
-          ELSE ." xau2"
-          THEN 
-      ELSE 2 3 <= IF
-                  2 .
-                  ELSE 3 .
-                  THEN
-      THEN 
+: square ( n ) ." ola" ;
+3 square

@@ -5,6 +5,7 @@ from forth2vm_lex import tokens
 
 global if_count
 if_count = 1
+n_pushi = 0
 
 """
 VM : instructions
@@ -16,6 +17,13 @@ instruction : NUM
             | SINAL
             | WORD
             | CONDITION
+            | LOOPs
+
+LOOPs : BEGIN instructions UNTIL
+     | BEGIN instructions AGAIN
+     | BEGIN instructions WHILE instructions REPEAT            
+     | DO instructions LOOP
+     | DO instructions +LOOP   
 
 CONDITION : COND1
           | COND2
@@ -48,7 +56,8 @@ SINAL : '+'
 
 def p_VM(p):
     """VM : instructions"""
-    p[0] = arvore.ProgramNode(p[1])
+    global n_pushi
+    p[0] = arvore.ProgramNode(p[1],n_pushi)
 
 def p_instructions(p):
     """instructions : instructions instruction"""
@@ -58,9 +67,57 @@ def p_instructions_single(p):
     """instructions : instruction"""
     p[0] = [p[1]]
 
-def p_instruction2(p):
+def p_instruction(p):
     """instruction : CONDITION"""
+    p[0] = p[1]        
+
+def p_instruction2(p):
+    """instruction : WORD"""
     p[0] = p[1]
+
+def p_instruction3(p):
+    """instruction : NUM"""
+    p[0] = arvore.NumberNode(p[1]) 
+
+def p_instruction4(p):
+    """instruction : SINAL"""
+    p[0] = p[1]
+
+def p_instruction5(p):
+    """instruction : LOOPTYPE"""
+    p[0] = p[1]
+
+def p_LOOP(p):
+    """LOOPTYPE : BEGIN instructions UNTIL"""
+    global if_count
+    p[0] = arvore.LoopNodeUntil(p[2],if_count)
+    if_count += 1
+    
+def p_LOOP2(p):
+    """LOOPTYPE : BEGIN instructions AGAIN"""
+    global if_count
+    p[0] = arvore.LoopNodeAgain(p[2],if_count)
+    if_count += 1
+
+def p_LOOP3(p):
+    """LOOPTYPE : BEGIN instructions WHILE instructions REPEAT"""
+    global if_count
+    p[0] = arvore.LoopNodeWhile(p[2],if_count,p[4])
+    if_count += 1
+
+def p_LOOP4(p):
+    """LOOPTYPE : DO instructions LOOP"""
+    global if_count,n_pushi
+    p[0] = arvore.LoopNodeDO(p[2],if_count,n_pushi,False)
+    if_count += 1
+    n_pushi += 2
+
+def p_LOOP5(p):
+    """LOOPTYPE : DO instructions PLUSLOOP"""
+    global if_count, n_pushi
+    p[0] = arvore.LoopNodeDO(p[2],if_count,n_pushi,True)
+    if_count += 1
+    n_pushi += 2
 
 def p_CONDITION(p):
     """CONDITION : IF instructions ELSE instructions THEN
@@ -71,15 +128,6 @@ def p_CONDITION(p):
         if_count += 1
     else:
         p[0] = arvore.ConditionNode(p[2],if_count)
-        
-
-def p_instruction3(p):
-    """instruction : WORD"""
-    p[0] = p[1]
-
-def p_instruction4(p):
-    """instruction : NUM"""
-    p[0] = arvore.NumberNode(p[1]) 
 
 def p_WORD(p):
     """WORD : WORD_EXEC
@@ -93,6 +141,7 @@ def p_WORD_EXEC(p):
                  | CR
                  | DUP
                  | SWAP
+                 | DROP
                  | USE_VAR
                  | USE_WORD"""
     print(p[1])
@@ -100,14 +149,15 @@ def p_WORD_EXEC(p):
 
 def p_WORD_DEC(p):
     """WORD_DEC : DEC_WORD
-                | ATRB_VAR
-                | DEC_VAR"""
-    p[0] = arvore.WordNodeDec(p[1])
+                | ATRB_VAR """
+    global n_pushi
+    p[0] = arvore.WordNodeDec(p[1],n_pushi)
 
-
-def p_instruction5(p):
-    """instruction : SINAL"""
-    p[0] = p[1]
+def p_WORD_DEC2(p):
+    """WORD_DEC : DEC_VAR"""
+    global n_pushi
+    p[0] = arvore.WordNodeDec(p[1],n_pushi)
+    n_pushi += 1
 
 def p_SINAL(p):
     """SINAL : '+'
@@ -117,7 +167,8 @@ def p_SINAL(p):
              | INF
              | SUP
              | INFEQ
-             | SUPEQ"""
+             | SUPEQ
+             | EQ"""
     p[0] = arvore.SignalNode(p[1])
 
 def p_error(p):

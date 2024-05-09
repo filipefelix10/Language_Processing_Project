@@ -19,11 +19,21 @@ tokens = (
     'THEN',
     'SUP',
     'INF',
+    'EQ',
     'INFEQ',
     'SUPEQ',
+    'BEGIN',
+    'UNTIL',
+    'WHILE',
+    'REPEAT',
+    'AGAIN',
+    'DROP',
+    'LOOP',
+    'PLUSLOOP',
+    'DO'
 )
 
-literals = ['/','*','+','"','-','(',')','=']
+literals = ['/','*','+','"','-']
 
 
 def t_INFEQ(t):
@@ -40,6 +50,46 @@ def t_SUP(t):
 
 def t_INF(t):
     r'<'
+    return t
+
+def t_EQ(t):
+    r'='
+    return t
+
+def t_DO(t):
+    r'(?i:(DO))'
+    return t
+
+def t_PLUSLOOP(t):
+    r'(?i:(\+LOOP))'
+    return t
+
+def t_LOOP(t):
+    r'(?i:(LOOP))'
+    return t
+
+def t_DROP(t):
+    r'(?i:(DROP))'
+    return t
+
+def t_BEGIN(t):
+    r'(?i:(BEGIN))'
+    return t
+
+def t_UNTIL(t):
+    r'(?i:(UNTIL))'
+    return t
+
+def t_WHILE(t):
+    r'(?i:(WHILE))'
+    return t
+
+def t_REPEAT(t):
+    r'(?i:(REPEAT))'
+    return t
+
+def t_AGAIN(t):
+    r'(?i:(AGAIN))'
     return t
 
 def t_IF(t):
@@ -70,6 +120,10 @@ def t_SWAP(t):
     r'(?i:(SWAP))'
     return t
 
+def t_DEC_WORD(t):
+    r':\s[a-zA-Z]+\w*\s\(\sn(\sn)*\s\)(\s[a-zA-Z0-9*+-/"\.]+(\s@)?)+\s;'
+    return t
+
 def t_PRINT_S(t):
     r'\." [a-zA-Z0-9_ ]*"'
     return t
@@ -80,10 +134,6 @@ def t_ATRB_VAR(t):
 
 def t_USE_VAR(t):
     r'(([a-zA-Z]+\w*)?)\s@'
-    return t
-
-def t_DEC_WORD(t):
-    r':\s[a-zA-Z]+\w*\s\(\sn(\sn)*\s\)(\s[a-zA-Z0-9*+-/]+(\s@)?)+\s;'
     return t
 
 def t_DEC_VAR(t):
@@ -99,7 +149,7 @@ def t_DOT(t):
     return t
 
 def t_NUM(t):
-    r'\d+'
+    r'-?\d+'
     t.value = int(t.value)
     return t
 
