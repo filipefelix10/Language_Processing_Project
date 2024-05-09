@@ -33,7 +33,7 @@ tokens = (
     'DO'
 )
 
-literals = ['/','*','+','"','-']
+literals = ['/','*','+','"','-',';']
 
 
 def t_INFEQ(t):
@@ -121,7 +121,7 @@ def t_SWAP(t):
     return t
 
 def t_DEC_WORD(t):
-    r':\s[a-zA-Z]+\w*\s\(\sn(\sn)*\s\)(\s[a-zA-Z0-9*+-/"\.]+(\s@)?)+\s;'
+    r':\s[a-zA-Z]+\w*\s\(\sn(\sn)*\s\)'
     return t
 
 def t_PRINT_S(t):

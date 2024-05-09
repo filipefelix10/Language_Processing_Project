@@ -1,2 +1,4 @@
-: square ( n ) ." ola" ;
+VARIABLE xau 
+10 xau !
+: square ( n ) ." O valor " xau @ .  ;
 3 square

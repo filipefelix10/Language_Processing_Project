@@ -47,6 +47,7 @@ class ProgramNode(ASTNode):
         code = code + "stop\n\n"
         for func in dict_vars:
             if dict_vars[func]["tipo"] == "FUNC":
+                code+= func + ":\n"
                 code += dict_vars[func]["instrucoes"]
         return code
     
@@ -95,6 +96,8 @@ class WordNodeExec(ASTNode):
 
     def generate_code(self):
         global dict_var, dict_vars
+        print(self.value,"patati")
+
         print_s = self.value.split(".")
         valor = self.value.split(" ")
         match valor[0].upper():
@@ -110,25 +113,25 @@ class WordNodeExec(ASTNode):
                     else: res = ""
             case _ if len(valor) > 1:
                     if(len(print_s)) > 1: print_s = re.sub(r"(^'|'$)", "", print_s[1])
-                    print(print_s)
+                    print(valor,'olaaa')
                     if valor[0] in dict_vars and valor[1] == "@":
                         posicao = dict_vars[valor[0]]["pos"]
                         res = "pushg " + str(posicao)
-                    elif re.match(r'(\.)?"\s(\w+\s*)*"', print_s):
+                    elif not isinstance(print_s,list) and re.match(r'(\.)?"\s(\w+\s*)*"', print_s) :
                         res = 'pushs ' + print_s + "\n" + "writes" + "\n"
                     else: res = ""
         return res + "\n"
     
 
 class WordNodeDec(ASTNode):
-    def __init__(self, value, n_pushi):
+    def __init__(self, value, n_pushi, instrucoes=None):
         self.value = value
         self.n_pushi = n_pushi
+        self.instrucoes = instrucoes
 
     def generate_code(self):
         global dict_var, dict_vars
         valor = self.value.split(" ")
-        print(valor)
         match valor[0]:
             case 'VARIABLE':
                 if len(valor) > 1:
@@ -141,10 +144,25 @@ class WordNodeDec(ASTNode):
                         posicao = dict_vars[valor[0]]["pos"]
                         res = "storeg " + str(posicao)
                     elif valor[0] == ":":
-                        dict_temp = {"tipo": "FUNC", "pos": self.n_pushi, "instrucoes": get_intrucoes(valor)}
+                        res = ''
+                        valor = " ".join(valor)
+                        valor = valor.split(")")
+                        list_n = valor[0].split("(")[1].split(" ")
+                        n_numbers = list_n.count("n")
+
+                    
+                        for n in range(0,n_numbers):
+                            res += "pushfp\n" + "load " + str(-1-n) + "\n"
+
+                        inst=''
+                        for i in self.instrucoes:
+                            inst += i.generate_code()
+                        inst += "return\n\n" 
+                        dict_temp = {"tipo": "FUNC", "pos": self.n_pushi, "instrucoes":inst}
                         dict_var.append(dict_temp)
-                        dict_vars[valor[1]] = dict_temp
-                        res = ""
+                        print(valor,"oi")
+                        dict_vars[valor[0].split(' ')[1]] = dict_temp
+                      
                     else: res = ""
         return res + "\n"
 
@@ -243,70 +261,6 @@ class LoopNodeDO(ASTNode):
 
         return code
     
-
-def get_intrucoes(valor):
-    instr = valor[1] + ":\n"
-    valor = " ".join(valor)
-    valor = valor.split(")")
-    list_n = valor[0].split("(")[1].split(" ")
-    n_numbers = list_n.count("n")
-    valor = valor[1].split(" ")
-
-    for n in range(0,n_numbers):
-        instr += "pushfp\n" + "load " + str(-1-n) + "\n"
-
-    for i in range(0,len(valor)-1):
-        match valor[i].upper():
-            case '.': 
-                instr += 'writei\n' + 'pushs " "\n' + 'writes\n'
-            case 'PRINT_S':
-                instr += 'writes\n'
-            case 'EMIT':
-                instr += 'writeln\n'
-            case 'CR':
-                instr += 'writeln\n'
-            case 'DUP':
-                instr += 'dup 1\n'
-            case 'SWAP':
-                instr += 'swap\n'
-            case 'DROP':
-                instr += 'pop 1\n'
-            case 'PRINT_S': 
-                instr += 'writes\n' # FIXME: Implementar PRINT_S
-            case '+':
-                instr += 'add\n'
-            case '-':
-                instr += 'sub\n'
-            case '*':
-                instr += 'mul\n'
-            case '/':
-                instr += 'div\n'
-            case '>':
-                instr += 'sup\n'
-            case '<':
-                instr += 'inf\n'
-            case '<=':
-                instr += 'infeq\n'
-            case '>=':
-                instr += 'supeq\n'
-            case '=':
-                instr += 'equal\n'
-            case _ if valor[i] in dict_vars:
-                if dict_vars[valor[i]]["tipo"] == "FUNC":
-                    instr += "pusha " + str(valor[i]) + "\n" + "call\n"
-                elif valor[i] in dict_vars and dict_vars[valor[i]]["tipo"] == "VARIABLE":
-                    posicao = dict_vars[valor[i]]["pos"]
-                    instr += "pushg " + str(posicao) + "\n"
-                else:
-                    instr += ""
-            case _:  # Default case to handle anything not matched specifically
-                if re.match(r'\d+', valor[i]):  # Checking if the item is all digits
-                    instr += "pushi " + valor[i] + "\n"
-                else:
-                    instr += ""
-
-    instr += "return\n\n"  
-    return instr
 
 
 

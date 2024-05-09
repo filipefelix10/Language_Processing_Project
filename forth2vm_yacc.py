@@ -148,10 +148,15 @@ def p_WORD_EXEC(p):
     p[0] = arvore.WordNodeExec(p[1])
 
 def p_WORD_DEC(p):
-    """WORD_DEC : DEC_WORD
-                | ATRB_VAR """
+    """WORD_DEC : DEC_WORD instructions ';' """     
+    global n_pushi
+    p[0] = arvore.WordNodeDec(p[1],n_pushi,p[2])
+
+def p_WORD_DEC1(p):
+    """ WORD_DEC : ATRB_VAR """
     global n_pushi
     p[0] = arvore.WordNodeDec(p[1],n_pushi)
+
 
 def p_WORD_DEC2(p):
     """WORD_DEC : DEC_VAR"""

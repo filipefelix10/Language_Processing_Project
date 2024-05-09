@@ -1,4 +1,10 @@
+pushn 1
 start
+
+pushi 10
+storeg 0
+pushfp
+load -1
 
 pushi 3
 pusha square
@@ -7,7 +13,12 @@ call
 stop
 
 square:
-pushfp
-load -1
+pushs " O valor "
+writes
+
+pushg 0
+writei
+pushs " "
+writes
 return
 
