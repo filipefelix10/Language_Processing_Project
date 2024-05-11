@@ -30,7 +30,8 @@ tokens = (
     'DROP',
     'LOOP',
     'PLUSLOOP',
-    'DO'
+    'DO',
+    '2DUP',
 )
 
 literals = ['/','*','+','"','-',';']
@@ -104,6 +105,10 @@ def t_THEN(t):
     r'(?i:(THEN))'
     return t
 
+def t_2DUP(t):
+    r'(?i:(2DUP))'
+    return t
+
 def t_CR(t):
     r'(?i:(cr))'
     return t
@@ -121,11 +126,11 @@ def t_SWAP(t):
     return t
 
 def t_DEC_WORD(t):
-    r':\s[a-zA-Z]+\w*\s\(\sn(\sn)*\s\)'
+    r':\s\w+\w*\s\(\sn(\sn)*\s\)'
     return t
 
 def t_PRINT_S(t):
-    r'\." [a-zA-Z0-9_ ]*"'
+    r'\.".*?"'
     return t
 
 def t_ATRB_VAR(t):

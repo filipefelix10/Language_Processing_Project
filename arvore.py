@@ -96,21 +96,20 @@ class WordNodeExec(ASTNode):
 
     def generate_code(self):
         global dict_var, dict_vars
-        print(self.value,"patati")
 
         print_s = self.value.split(".")
         valor = self.value.split(" ")
+        print(valor[0], "ESTOU AQUI")
         match valor[0].upper():
             case '.': res = 'writei\n' + 'pushs " "\n' + 'writes'
             case 'EMIT': res = 'writechr'
             case 'CR': res = 'writeln'
             case 'DUP': res = 'dup 1'
+            case '2DUP': res = 'pushsp load -1' + '\n' + 'pushsp load -1' + '\n'
             case 'SWAP': res = 'swap'
             case 'DROP': res = 'pop 1'
-            case _ if len(valor) == 1:
-                    if valor[0] in dict_vars:
+            case _ if valor[0] in dict_vars and dict_vars[valor[0]]["tipo"] == "FUNC":
                         res = "pusha " + str(valor[0]) + "\n" + "call\n"
-                    else: res = ""
             case _ if len(valor) > 1:
                     if(len(print_s)) > 1: print_s = re.sub(r"(^'|'$)", "", print_s[1])
                     print(valor,'olaaa')
@@ -150,14 +149,13 @@ class WordNodeDec(ASTNode):
                         list_n = valor[0].split("(")[1].split(" ")
                         n_numbers = list_n.count("n")
 
-                    
+                        inst = ""
                         for n in range(0,n_numbers):
-                            res += "pushfp\n" + "load " + str(-1-n) + "\n"
-
-                        inst=''
+                            inst += "pushfp\n" + "load " + str(-1-n) + "\n" 
+                        
                         for i in self.instrucoes:
                             inst += i.generate_code()
-                        inst += "return\n\n" 
+                        inst += "return\n\n"
                         dict_temp = {"tipo": "FUNC", "pos": self.n_pushi, "instrucoes":inst}
                         dict_var.append(dict_temp)
                         print(valor,"oi")
@@ -179,8 +177,9 @@ class ConditionNode(ASTNode):
             code += i.generate_code()
         code += "jump endif" + str(self.if_count) + "\n"
         code += "else" + str(self.if_count) + ":\n"
-        for i in self.condition2:
-            code += i.generate_code()
+        if self.condition2:
+            for i in self.condition2:
+                code += i.generate_code()
         code += "endif" + str(self.if_count) + ":\n"
 
         return code

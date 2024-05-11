@@ -120,14 +120,17 @@ def p_LOOP5(p):
     n_pushi += 2
 
 def p_CONDITION(p):
-    """CONDITION : IF instructions ELSE instructions THEN
-                 | IF instructions THEN"""
+    """CONDITION : IF instructions ELSE instructions THEN """
     global if_count
-    if len(p) == 6:
-        p[0] = arvore.ConditionNode(p[2],if_count,p[4])
-        if_count += 1
-    else:
-        p[0] = arvore.ConditionNode(p[2],if_count)
+    p[0] = arvore.ConditionNode(p[2],if_count,p[4])
+    if_count += 1
+
+
+def p_CONDITION2(p):
+    """CONDITION : IF instructions THEN"""
+    global if_count
+    p[0] = arvore.ConditionNode(p[2],if_count)
+    if_count += 1
 
 def p_WORD(p):
     """WORD : WORD_EXEC
@@ -140,6 +143,7 @@ def p_WORD_EXEC(p):
                  | EMIT
                  | CR
                  | DUP
+                 | 2DUP
                  | SWAP
                  | DROP
                  | USE_VAR

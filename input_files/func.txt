@@ -1,0 +1,3 @@
+: maior2 ( n n ) 2dup > if swap then ;
+: maior3 ( n n n ) maior2 maior2 . ;
+2 11 3 maior3
