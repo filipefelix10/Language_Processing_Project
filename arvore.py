@@ -1,10 +1,24 @@
 import re
-
+from fun_predefinidas import lista_predefinidas
 
 global dict_var, dict_vars
 dict_var = []
 dict_vars = {}
 
+def func_predefinidas(lista):
+    global dict_vars
+    for func in lista:
+        inst = ""
+        for n in range(0,func[2]):
+            inst += "pushfp\n" + "load " + str(-1-n) + "\n"
+        
+        inst += func[1]
+        dict_temp = {"tipo": "FUNC", "pos": -1, "instrucoes":inst}
+        dict_var.append(dict_temp)
+        dict_vars[func[0]] = dict_temp
+
+
+func_predefinidas(lista_predefinidas)
 
 class ASTNode:
     def __init__(self) -> None:
@@ -260,8 +274,3 @@ class LoopNodeDO(ASTNode):
 
         return code
     
-
-
-
-
-

@@ -1,21 +1,8 @@
-start
-pushi 100
-pushi 35
-pusha max
-call
+#########################################################
+# Funções pré-definidas
 
-pushi 32
-pusha min
-call
-
-stop
-
-max:
-pushfp
-load -1
-pushfp
-load -2
-pushfp
+lista_predefinidas = [("max",
+"""pushfp
 load -1
 pushfp
 load -2
@@ -35,14 +22,9 @@ writei
 pushs " "
 writes
 endif1:
-return
-
-min:
-pushfp
-load -1
-pushfp
-load -2
-
+return\n\n""",2),
+("min",
+ """
 pushfp
 load -1
 pushfp
@@ -63,5 +45,5 @@ writei
 pushs " "
 writes
 endif1:
-return
+return\n\n""",2)]
 

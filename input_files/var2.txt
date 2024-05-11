@@ -1,0 +1,5 @@
+VARIABLE x
+5 x !
+VARIABLE y
+2 y !
+x @ y @ * .

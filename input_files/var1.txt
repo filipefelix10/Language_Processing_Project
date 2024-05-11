@@ -1,0 +1,3 @@
+VARIABLE x
+10 x !
+x @ .
