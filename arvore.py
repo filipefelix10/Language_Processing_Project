@@ -1,8 +1,8 @@
 import re
+import json
 from fun_predefinidas import lista_predefinidas
 
-global dict_var, dict_vars
-dict_var = []
+global  dict_vars
 dict_vars = {}
 
 def func_predefinidas(lista):
@@ -14,11 +14,17 @@ def func_predefinidas(lista):
         
         inst += func[1]
         dict_temp = {"tipo": "FUNC", "pos": -1, "instrucoes":inst,"Is_call": False}
-        dict_var.append(dict_temp)
         dict_vars[func[0]] = dict_temp
 
 
 func_predefinidas(lista_predefinidas)
+
+def preenche_json():
+    global dict_vars
+    # Convert and write JSON object to file
+    with open("dict_vars.json", "w") as outfile: 
+        json.dump(dict_vars, outfile)
+
 
 class ASTNode:
     def __init__(self) -> None:
@@ -63,19 +69,9 @@ class ProgramNode(ASTNode):
             if dict_vars[func]["tipo"] == "FUNC" and dict_vars[func]["Is_call"] == True:
                 code+= func + ":\n"
                 code += dict_vars[func]["instrucoes"]
+        preenche_json()
         return code
-    
-    def print_lista_variaveis():
-        print("VARIAVEIS NO DICT:")
-        for key,value in dict_vars.items():
-            print(f"key : \n  {key}")
-            print("Value :")
-            for key2,value2 in value.items():
-                print("  "+key2, ":", value2)
-
-    def get_dict_vars():
-        return dict_vars
-    
+       
 
 class NumberNode(ASTNode):
     def __init__(self, value):
@@ -109,7 +105,7 @@ class WordNodeExec(ASTNode):
 
 
     def generate_code(self):
-        global dict_var, dict_vars
+        global dict_vars
 
         print_s = self.value.split(".")
         valor = self.value.split(" ")
@@ -126,7 +122,6 @@ class WordNodeExec(ASTNode):
                         res = "pusha " + str(valor[0]) + "\n" + "call\n"
             case _ if len(valor) > 1:
                     if(len(print_s)) > 1: print_s = re.sub(r"(^'|'$)", "", print_s[1])
-                    print(print_s)
                     if valor[0] in dict_vars and valor[1] == "@":
                         posicao = dict_vars[valor[0]]["pos"]
                         res = "pushg " + str(posicao)
@@ -143,13 +138,12 @@ class WordNodeDec(ASTNode):
         self.instrucoes = instrucoes
 
     def generate_code(self):
-        global dict_var, dict_vars
+        global dict_vars
         valor = self.value.split(" ")
         match valor[0]:
             case 'VARIABLE':
                 if len(valor) > 1:
                     dict_temp = {"tipo": "VARIABLE", "pos": self.n_pushi}
-                    dict_var.append(dict_temp)
                     dict_vars[valor[1]] = dict_temp
                 res = ""
             case _ if len(valor) > 1:
@@ -171,8 +165,6 @@ class WordNodeDec(ASTNode):
                             inst += i.generate_code()
                         inst += "return\n\n"
                         dict_temp = {"tipo": "FUNC", "pos": self.n_pushi, "instrucoes":inst,"Is_call": True}
-                        dict_var.append(dict_temp)
-                        print(valor,"oi")
                         dict_vars[valor[0].split(' ')[1]] = dict_temp
                       
                     else: res = ""

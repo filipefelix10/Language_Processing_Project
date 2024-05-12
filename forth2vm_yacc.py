@@ -148,7 +148,6 @@ def p_WORD_EXEC(p):
                  | DROP
                  | USE_VAR
                  | USE_WORD"""
-    print(p[1])
     p[0] = arvore.WordNodeExec(p[1])
 
 def p_WORD_DEC(p):
@@ -197,7 +196,7 @@ def read_input_file(filename):
         data = file.read()
     return data
 
-# Lendo o conteúdo do arquivo
+# Lê o ficheiro de entrada
 data = read_input_file('input.txt')
 
 parser = yacc.yacc()
@@ -213,8 +212,8 @@ def write_output_file(filename, data):
 write_output_file('output.txt', ast.generate_code())  # Gera o código da AST
 
 # fazer a travessia na arvore
-print(ast.generate_code())  # Gera o código da AST
-arvore.ProgramNode.print_lista_variaveis()  # Imprime a lista de variáveis
+#print(ast.generate_code())  # Gera o código da AST
+print("Fim da análise sintática.\n")
 
 
 
