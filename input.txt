@@ -1,17 +1,1 @@
-VARIABLE x
-5 x !
-VARIABLE y
-2 y !
-VARIABLE z
-x @ y @ * z !
-: square ( n ) dup * ;
-z @ square z !
-z @ 50 > if z @ 10 * z ! 
-         else z @ 10 / z !  
-         then
-BEGIN
-    ." the value of z " z @ .
-    z @ 10 + DUP z ! z @ 1050 < 
-UNTIL
-
-(1000 < 1050 entao incrementa)
+CHAR o2 . 

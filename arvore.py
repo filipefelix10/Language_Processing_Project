@@ -112,6 +112,7 @@ class WordNodeExec(ASTNode):
         match valor[0].upper():
             case '.': res = 'writei\n' + 'pushs " "\n' + 'writes'
             case 'EMIT': res = 'writechr'
+            case 'CHAR' : res = 'pushs "' + str(valor[1][0]) + '"\nchrcode'
             case 'CR': res = 'writeln'
             case 'DUP': res = 'dup 1'
             case '2DUP': res = 'pushsp load -1' + '\n' + 'pushsp load -1' + '\n'

@@ -61,7 +61,7 @@ def p_VM(p):
 
 def p_instructions(p):
     """instructions : instructions instruction"""
-    p[0] = p[1] + [p[2]] 
+    p[0] = p[1] + [p[2]]
 
 def p_instructions_single(p):
     """instructions : instruction"""
@@ -143,6 +143,7 @@ def p_WORD_EXEC(p):
                  | EMIT
                  | CR
                  | DUP
+                 | CHAR
                  | 2DUP
                  | SWAP
                  | DROP

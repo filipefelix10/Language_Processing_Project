@@ -8,6 +8,7 @@ tokens = (
     'PRINT_S',
     'DOT',
     'DUP',
+    'CHAR',
     'DEC_VAR',
     'ATRB_VAR',
     'USE_VAR',
@@ -103,6 +104,10 @@ def t_ELSE(t):
 
 def t_THEN(t):
     r'(?i:(THEN))'
+    return t
+
+def t_CHAR(t):
+    r'(?i:(CHAR\s[^\s.]+))'
     return t
 
 def t_2DUP(t):
