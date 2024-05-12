@@ -1,0 +1,8 @@
+VARIABLE x
+5 x !
+
+BEGIN
+    ." ola" CR
+    x @ 1 - DUP x ! 0 > 
+UNTIL
+

@@ -1,0 +1,4 @@
+VARIABLE x
+5 x !
+
+5 0 BEGIN  x @ dup x @ 1 - x ! 0 > WHILE x @ . CR REPEAT

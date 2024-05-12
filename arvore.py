@@ -13,7 +13,7 @@ def func_predefinidas(lista):
             inst += "pushfp\n" + "load " + str(-1-n) + "\n"
         
         inst += func[1]
-        dict_temp = {"tipo": "FUNC", "pos": -1, "instrucoes":inst}
+        dict_temp = {"tipo": "FUNC", "pos": -1, "instrucoes":inst,"Is_call": False}
         dict_var.append(dict_temp)
         dict_vars[func[0]] = dict_temp
 
@@ -60,7 +60,7 @@ class ProgramNode(ASTNode):
             code = "pushn " + str(self.n_pushi) + "\n" + code
         code = code + "stop\n\n"
         for func in dict_vars:
-            if dict_vars[func]["tipo"] == "FUNC":
+            if dict_vars[func]["tipo"] == "FUNC" and dict_vars[func]["Is_call"] == True:
                 code+= func + ":\n"
                 code += dict_vars[func]["instrucoes"]
         return code
@@ -113,7 +113,6 @@ class WordNodeExec(ASTNode):
 
         print_s = self.value.split(".")
         valor = self.value.split(" ")
-        print(valor[0], "ESTOU AQUI")
         match valor[0].upper():
             case '.': res = 'writei\n' + 'pushs " "\n' + 'writes'
             case 'EMIT': res = 'writechr'
@@ -123,14 +122,15 @@ class WordNodeExec(ASTNode):
             case 'SWAP': res = 'swap'
             case 'DROP': res = 'pop 1'
             case _ if valor[0] in dict_vars and dict_vars[valor[0]]["tipo"] == "FUNC":
+                        dict_vars[valor[0]]["Is_call"] = True # Afirma que a função foi chamada
                         res = "pusha " + str(valor[0]) + "\n" + "call\n"
             case _ if len(valor) > 1:
                     if(len(print_s)) > 1: print_s = re.sub(r"(^'|'$)", "", print_s[1])
-                    print(valor,'olaaa')
+                    print(print_s)
                     if valor[0] in dict_vars and valor[1] == "@":
                         posicao = dict_vars[valor[0]]["pos"]
                         res = "pushg " + str(posicao)
-                    elif not isinstance(print_s,list) and re.match(r'(\.)?"\s(\w+\s*)*"', print_s) :
+                    elif not isinstance(print_s,list):
                         res = 'pushs ' + print_s + "\n" + "writes" + "\n"
                     else: res = ""
         return res + "\n"
@@ -170,7 +170,7 @@ class WordNodeDec(ASTNode):
                         for i in self.instrucoes:
                             inst += i.generate_code()
                         inst += "return\n\n"
-                        dict_temp = {"tipo": "FUNC", "pos": self.n_pushi, "instrucoes":inst}
+                        dict_temp = {"tipo": "FUNC", "pos": self.n_pushi, "instrucoes":inst,"Is_call": True}
                         dict_var.append(dict_temp)
                         print(valor,"oi")
                         dict_vars[valor[0].split(' ')[1]] = dict_temp
@@ -205,7 +205,8 @@ class LoopNodeUntil(ASTNode):
         self.if_count = if_count
     
     def generate_code(self):
-        code = "while" + str(self.if_count) + ":\n"
+        code = ""
+        code += "while" + str(self.if_count) + ":\n"
         for i in self.condition1:
             code += i.generate_code()
         code += "jz endwhile" + str(self.if_count) + "\n"

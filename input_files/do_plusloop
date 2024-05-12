@@ -1,0 +1,4 @@
+VARIABLE x
+5 x !
+
+5 0 do x @ . 3 +loop

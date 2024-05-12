@@ -1,67 +1,62 @@
+pushn 3
 start
-pushi 100
-pushi 35
-pusha max
+
+pushi 5
+storeg 0
+
+pushi 2
+storeg 1
+
+pushg 0
+pushg 1
+mul
+storeg 2
+
+pushg 2
+pusha square
 call
 
-pushi 32
-pusha min
-call
+storeg 2
+pushg 2
+pushi 50
+sup
+jz else1
+pushg 2
+pushi 10
+mul
+storeg 2
+jump endif1
+else1:
+pushg 2
+pushi 10
+div
+storeg 2
+endif1:
+while2:
+pushs " the value of z "
+writes
 
+pushg 2
+writei
+pushs " "
+writes
+pushg 2
+pushi 10
+add
+dup 1
+storeg 2
+pushg 2
+pushi 1050
+inf
+jz endwhile2
+jump while2
+endwhile2:
 stop
 
-max:
+square:
 pushfp
 load -1
-pushfp
-load -2
-pushfp
-load -1
-pushfp
-load -2
-pushsp
-load -1
-pushsp
-load -1
-sup
-jz else1
-swap
-writei
-pushs " "
-writes
-jump endif1
-else1:
-writei
-pushs " "
-writes
-endif1:
-return
-
-min:
-pushfp
-load -1
-pushfp
-load -2
-
-pushfp
-load -1
-pushfp
-load -2
-pushsp
-load -1
-pushsp
-load -1
-sup
-jz else1
-writei
-pushs " "
-writes
-jump endif1
-else1:
-swap
-writei
-pushs " "
-writes
-endif1:
+dup 1
+mul
 return
 

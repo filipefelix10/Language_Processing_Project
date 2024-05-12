@@ -32,7 +32,6 @@ tokens = (
     'PLUSLOOP',
     'DO',
     '2DUP',
-    'COMMENT'
 )
 
 literals = ['/','*','+','"','-',';']
@@ -159,11 +158,8 @@ def t_NUM(t):
     t.value = int(t.value)
     return t
 
-def t_COMMENT(t):
-    r'\(.*?\)'
-    pass
-
 t_ignore = '\t\r\n '
+t_ignore_COMMENT = r'\(.*?\)'
 
 def t_newline(t):
     r'\n+'

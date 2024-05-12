@@ -1,0 +1,15 @@
+VARIABLE x
+5 x !
+VARIABLE y
+2 y !
+VARIABLE z
+x @ y @ * z !
+: square ( n ) dup * ;
+z @ square z !
+z @ 50 > if z @ . z @ 10 * z ! 
+         else z @ . z @ 10 / z !  
+         then
+BEGIN
+    ." the value of z: "z @ . CR
+    z @ 10 / DUP z ! z @ 50 < 
+UNTIL
